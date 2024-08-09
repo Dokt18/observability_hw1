@@ -1,0 +1,93 @@
+scrape_configs:
+- job_name: 'win-exporter'
+  static_configs:
+  - targets: ['srv-app-01:9182']
+- job_name: kafka-exporter
+  scrape_interval: 5s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+  static_configs:
+  - targets: ['host.docker.internal:9308']
+- job_name: node-exporter
+  scrape_interval: 5s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+  static_configs:
+  - targets: ['host.docker.internal:9100']
+- job_name: rabbitmq
+  scrape_interval: 5s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+  static_configs:
+  - targets: ['rabbitmq:15692']
+- job_name: rabbitmq-per-objec
+  scrape_interval: 5s
+  scrape_timeout: 10s
+  metrics_path: /metrics/per-object
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+  static_configs:
+  - targets: ['<ip>:15692']
+- job_name: 'blackbox-tcp-artemis'
+  scrape_timeout: 15s
+  scrape_interval: 5m
+  metrics_path: /probe
+  params:
+    module: [tcp_connect]
+  static_configs:
+   - targets:
+      - <ip>:61616
+  relabel_configs:
+   - source_labels: [__address__]
+     target_label: __param_target
+   - source_labels: [__param_target]
+     target_label: instance
+   - target_label: __address__
+     replacement: <ip>:9115
+- job_name: 'blackbox-http'
+  metrics_path: /probe
+  params:
+    module: [http_2xx]
+  static_configs:
+    - targets:
+      - https://<ip>
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: <ip>:9115
+- job_name: 'certificate-exporter'
+  scrape_interval: 5s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+  static_configs:
+    - targets: ['<ip>:9793']
+- job_name: 'cadvisor'
+  scrape_interval: 5s
+  static_configs:
+  - targets: ['cadvisor:8080']
+- job_name: 'certificate-exporter-linux'
+  scrape_interval: 5s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  tls_config:
+    insecure_skip_verify: true
+  static_configs:
+    - targets: ['host.docker.internal:9793']
+
