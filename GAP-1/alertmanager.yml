@@ -1,0 +1,31 @@
+global:
+  smtp_require_tls: false
+templates:
+ - '/etc/alertmanager/templates/mail.tmpl'
+route:
+  receiver: 'mail'
+  routes:
+    - matchers:
+      - severity="warn"
+      receiver: 'mail'
+      repeat_interval: 4h
+      group_by: [ alertname ]
+    - matchers:
+      - severity="critical"
+      receiver: 'telegram-webhook'
+
+receivers:
+  - name: 'mail'
+    email_configs:
+      - smarthost: 'ip'
+        from: 'fromtest@email.ru'
+        to: 'totest@email.ru'
+        auth_username: 'fromtest@email.ru'
+        headers:
+          subject: '{{ template "custom_mail_subject" . }}'
+        auth_password: 'password'
+        send_resolved: true
+  - name: "telegram-webhook"
+    webhook_configs:
+      - url: "http://prometheus-telegram/alert"
+        send_resolved: true
